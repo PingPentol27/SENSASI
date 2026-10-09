@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14213D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>SENSASI – Senakin Safety Informasi</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    html,body{margin:0;height:100%;background:#F3F5FA;font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
+    #app{position:fixed;inset:0;width:100%;height:100%;border:0}
+    #load{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;z-index:5;
+      background:radial-gradient(600px 300px at 100% 0%,rgba(239,108,53,.45),transparent 60%),linear-gradient(160deg,#14213D,#22365E);transition:opacity .5s}
+    #load img{width:110px;border-radius:26px;box-shadow:0 14px 40px rgba(0,0,0,.35);animation:pulse 1.6s ease-in-out infinite}
+    #load b{letter-spacing:3px;font-size:1.2rem} #load small{opacity:.7}
+    #load.hide{opacity:0;pointer-events:none}
+    @keyframes pulse{50%{transform:scale(1.05)}}
+    .bar{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:6;display:none;align-items:center;gap:10px;
+      background:#14213D;color:#fff;padding:12px 14px;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.3);font-size:14px;max-width:520px;margin:auto}
+    .bar img{width:36px;border-radius:9px}
+    .bar button{border:0;border-radius:10px;padding:9px 14px;font-weight:700;cursor:pointer}
+    .bar .ok{background:linear-gradient(135deg,#F07A3E,#E85F2C);color:#fff}.bar .no{background:transparent;color:#AFBAD0}
+    #off{background:#B93434}
+  </style>
+</head>
+<body>
+  <div id="load"><img src="icon-192.png" alt=""><b>SENSASI</b><small>Senakin Safety Informasi</small></div>
+  <div class="bar" id="inst"><img src="icon-192.png" alt=""><div style="flex:1">Pasang SENSASI di layar utama agar dibuka seperti aplikasi.</div>
+    <button class="no" onclick="tutup()">Nanti</button><button class="ok" id="btnInst">Pasang</button></div>
+  <div class="bar" id="off"><div style="flex:1">Tidak ada koneksi internet. SENSASI memerlukan internet.</div></div>
+  <script>
+    /* ===== GANTI dengan URL Web App Apps Script Anda (akhiran /exec) ===== */
+    const APP_URL = 'https://script.google.com/macros/s/GANTI_DENGAN_ID_DEPLOYMENT/exec';
+
+    const f = document.createElement('iframe');
+    f.id = 'app';
+    f.src = APP_URL + location.search;      /* ?page=induksi / ?page=apd / ?page=hadir&id=… ikut diteruskan */
+    f.allow = 'camera; clipboard-write; fullscreen; autoplay';
+    f.onload = () => document.getElementById('load').classList.add('hide');
+    document.body.appendChild(f);
+    setTimeout(() => document.getElementById('load').classList.add('hide'), 9000);
+    if (APP_URL.indexOf('GANTI_DENGAN') > -1) document.querySelector('#load small').textContent = 'APP_URL di index.html belum diisi';
+
+    const net = () => document.getElementById('off').style.display = navigator.onLine ? 'none' : 'flex';
+    addEventListener('online', net); addEventListener('offline', net); net();
+
+    let ev = null;
+    const sudah = () => { try { return localStorage.getItem('sensasi_inst_tutup') === '1'; } catch (e) { return false; } };
+    addEventListener('beforeinstallprompt', e => { e.preventDefault(); ev = e; if (!sudah()) document.getElementById('inst').style.display = 'flex'; });
+    document.getElementById('btnInst').onclick = async () => { if (!ev) return; ev.prompt(); await ev.userChoice; ev = null; tutup(); };
+    function tutup() { document.getElementById('inst').style.display = 'none'; try { localStorage.setItem('sensasi_inst_tutup', '1'); } catch (e) {} }
+    addEventListener('appinstalled', tutup);
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  </script>
+</body>
+</html>
